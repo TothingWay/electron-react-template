@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "main": "main.ts",
-  "description": "A simple template created using react and Electron.",
+  "description": "A simple template created using React and Electron.",
   "author": {
     "name": "TothingWay",
     "email": "200846290@qq.com"
