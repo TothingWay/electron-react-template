@@ -2,6 +2,7 @@
 const {
   default: installExtension,
   REACT_DEVELOPER_TOOLS,
+  REDUX_DEVTOOLS,
 } = require('electron-devtools-installer')
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
@@ -33,12 +34,13 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
   createWindow()
-  await installExtension(REACT_DEVELOPER_TOOLS)
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+  await installExtension(REACT_DEVELOPER_TOOLS)
+  await installExtension(REDUX_DEVTOOLS)
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

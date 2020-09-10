@@ -9,7 +9,12 @@
     "email": "200846290@qq.com"
   },
   "dependencies": {
-    "antd": "^4.6.3"
+    "antd": "^4.6.3",
+    "react-redux": "^7.2.1",
+    "react-router": "^5.2.0",
+    "react-router-config": "^5.1.1",
+    "react-router-dom": "^5.2.0",
+    "redux-thunk": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -100,6 +105,10 @@
     "@types/node": "^12.12.55",
     "@types/react": "^16.9.49",
     "@types/react-dom": "^16.9.8",
+    "@types/react-redux": "^7.1.9",
+    "@types/react-router": "^5.1.8",
+    "@types/react-router-config": "^5.0.1",
+    "@types/react-router-dom": "^5.1.5",
     "concurrently": "^5.3.0",
     "cross-env": "^7.0.2",
     "electron": "^9.3.0",
