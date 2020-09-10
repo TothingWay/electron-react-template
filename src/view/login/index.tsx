@@ -1,7 +1,7 @@
 import React, { memo } from 'react'
 
 function Login() {
-  return <div>login</div>
+  return <div>Welcome to electron</div>
 }
 
 export default memo(Login)

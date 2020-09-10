@@ -11,13 +11,14 @@ const isDev = require('electron-is-dev')
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1600,
-    height: 1200,
+    width: 1440,
+    height: 900,
     webPreferences: {
       nodeIntegration: true,
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
     },
+    titleBarStyle: 'hiddenInset',
   })
 
   const urlLocation = isDev
