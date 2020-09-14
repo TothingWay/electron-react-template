@@ -13,6 +13,7 @@ const SuspenseComponent = (
 }
 
 const Login = lazy(() => import('../view/login/'))
+const Main = lazy(() => import('../view/main/'))
 
 export default [
   {
@@ -28,6 +29,11 @@ export default [
         path: '/login',
         component: SuspenseComponent(Login),
         key: 'login',
+      },
+      {
+        path: '/main',
+        component: SuspenseComponent(Main),
+        key: 'main',
       },
     ],
   },
