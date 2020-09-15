@@ -1,0 +1,23 @@
+.footer-edit {
+  .bf-container {
+    height: auto;
+  }
+  .edit-control-bar {
+    box-shadow: none;
+  }
+  .edit-content {
+    height: 164px;
+    padding: 0;
+    .public-DraftEditor-content {
+      padding-top: 0;
+    }
+  }
+
+  .emoji {
+    background: transparent;
+    border: none;
+    &::after {
+      box-shadow: none !important;
+    }
+  }
+}

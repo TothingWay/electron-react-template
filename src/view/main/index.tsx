@@ -2,8 +2,12 @@ import React, { memo, useState, useEffect } from 'react'
 import { Layout, Menu, Input } from 'antd'
 import Scroll from '../../components/Scroll'
 import MenuAvatar from '../../components/MenuAvatar'
-import './index.scss'
+import ChatBubble from '../../components/ChatBubble'
+import Editor from '../../components/Editor'
+import 'braft-editor/dist/index.css'
+
 import { WechatOutlined } from '@ant-design/icons'
+import './index.scss'
 const { Content, Footer, Sider } = Layout
 const { Search } = Input
 
@@ -158,6 +162,83 @@ const users = [
   },
 ]
 
+const chatRecords = [
+  {
+    position: 'left',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content:
+      '有两只兔子，一只叫我喜欢你，另一只叫我不喜欢你，有一天我不喜欢你出去了，那么留在家里的这只叫什么?',
+  },
+  {
+    position: 'right',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '我不说，说了你占便宜。',
+  },
+  {
+    position: 'left',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content:
+      '胡说，我是在很正经的问问题，你一定想太多了，不知道就说不知道，我不会看不起你的。',
+  },
+  {
+    position: 'right',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '谁说我不知道啊!',
+  },
+  {
+    position: 'left',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '你就是不知道!',
+  },
+  {
+    position: 'right',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '我知道，我喜欢你。',
+  },
+  {
+    position: 'left',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '哇，你不知道就算了，突然表白吓人家一大跳。',
+  },
+  {
+    position: 'right',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '你占我便宜。',
+  },
+  {
+    position: 'left',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '西湖的水，我的泪!我情愿和你化作一团火焰，这是什么歌?',
+  },
+  {
+    position: 'right',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '千年等一回。',
+  },
+  {
+    position: 'left',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '只是因为在人群是多看了你一眼，这首呢?是谁唱的?',
+  },
+  {
+    position: 'right',
+    src:
+      'https://avatars2.githubusercontent.com/u/15687309?s=460&u=4410fa4fd1a67670c219cbf0ce29be5f019c2547&v=4',
+    content: '王菲唱的。',
+  },
+]
+
 function Main() {
   // 菜单收缩展开
   const [collapsed, setCollapsed] = useState(false)
@@ -176,6 +257,13 @@ function Main() {
   useEffect(() => {
     setUserList(users)
   }, [])
+
+  // 聊天记录
+  const [chatRecordList, setChatRecordList] = useState<Array<any>>([])
+  useEffect(() => {
+    setChatRecordList(chatRecords)
+  }, [])
+
   return (
     <Layout className="layout-main">
       <Sider
@@ -246,17 +334,31 @@ function Main() {
           </Menu>
         </Scroll>
       </Sider>
-      <Layout className="site-layout">
-        <Content style={{ margin: '0 16px' }}>
-          <div
-            className="site-layout-background"
-            style={{ padding: 24, minHeight: 360 }}
+      <Layout className="main-layout">
+        <div className="main-layout-header">用户1</div>
+        <Content>
+          <Scroll
+            bounceTop={false}
+            bounceBottom={false}
+            data={accountList}
+            style={{ height: '100%' }}
           >
-            Bill is a cat.
-          </div>
+            <div className="scroll-content">
+              {chatRecordList.map((item, index) => {
+                return (
+                  <ChatBubble
+                    key={index}
+                    position={item.position}
+                    content={item.content}
+                    src={item.src}
+                  />
+                )
+              })}
+            </div>
+          </Scroll>
         </Content>
-        <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©2018 Created by Ant UED
+        <Footer className="footer-edit" style={{ height: '210px' }}>
+          <Editor />
         </Footer>
       </Layout>
     </Layout>

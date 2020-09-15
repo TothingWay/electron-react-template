@@ -3,6 +3,7 @@
   top: 0;
   left: 0;
   height: 100vh;
+  width: 100%;
 }
 
 .dark-background {
@@ -48,7 +49,7 @@
 .user-search-wrapper {
   box-sizing: border-box;
   border-right: 1px solid #f0f2f5;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e6e6e6;
   padding: 15px 10px;
   .ant-input-group-wrapper {
     -webkit-app-region: no-drag
@@ -70,4 +71,27 @@
       bottom: 5px;
     }
   }
+}
+
+.main-layout-header {
+  height: 55px;
+  line-height: 55px;
+  border-bottom: 1px solid #e6e6e6;
+  padding-left: 20px;
+  font-size: 16px;
+  font-weight: 500;
+  background: #fafafa;
+}
+
+.main-layout {
+  height: 100vh;
+  overflow: hidden;
+  .scroll-content {
+    padding: 20px;
+  }
+}
+
+.footer-edit {
+  border-top: 1px solid #e6e6e6;
+  padding: 0;
 }

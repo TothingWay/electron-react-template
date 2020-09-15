@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Avatar, Badge } from 'antd'
 
 interface MenuAvatarProps {
@@ -16,4 +16,4 @@ function MenuAvatar(props: MenuAvatarProps) {
   )
 }
 
-export default MenuAvatar
+export default memo(MenuAvatar)
