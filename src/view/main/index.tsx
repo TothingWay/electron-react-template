@@ -1,13 +1,13 @@
 import React, { memo, useState, useEffect } from 'react'
-import { Layout, Menu, Input } from 'antd'
+import { Layout, Menu, Input, Dropdown } from 'antd'
 import Scroll from '../../components/Scroll'
 import MenuAvatar from '../../components/MenuAvatar'
 import ChatBubble from '../../components/ChatBubble'
 import Editor from '../../components/Editor'
 import 'braft-editor/dist/index.css'
-
-import { WechatOutlined } from '@ant-design/icons'
+import { MenuOutlined } from '@ant-design/icons'
 import './index.scss'
+import { useHistory } from 'react-router-dom'
 const { Content, Footer, Sider } = Layout
 const { Search } = Input
 
@@ -240,6 +240,7 @@ const chatRecords = [
 ]
 
 function Main() {
+  const history = useHistory()
   // 菜单收缩展开
   const [collapsed, setCollapsed] = useState(false)
   const onCollapse = (collapsed: boolean) => {
@@ -264,6 +265,20 @@ function Main() {
     setChatRecordList(chatRecords)
   }, [])
 
+  const handleMenuClick = ({ key }: any) => {
+    console.log(key)
+
+    if (key === 'logout') {
+      history.push('/login')
+    }
+  }
+
+  const menu = (
+    <Menu onClick={handleMenuClick}>
+      <Menu.Item key="logout">退出登录</Menu.Item>
+    </Menu>
+  )
+
   return (
     <Layout className="layout-main">
       <Sider
@@ -272,8 +287,16 @@ function Main() {
         collapsed={collapsed}
         onCollapse={onCollapse}
       >
-        <div className="dark-background">
-          <WechatOutlined />
+        <div id="dark-background" className="dark-background">
+          <Dropdown
+            overlay={menu}
+            trigger={['click']}
+            getPopupContainer={() =>
+              document.getElementById('dark-background') as HTMLElement
+            }
+          >
+            <MenuOutlined />
+          </Dropdown>
         </div>
         <Scroll
           bounceTop={false}
@@ -357,7 +380,7 @@ function Main() {
             </div>
           </Scroll>
         </Content>
-        <Footer className="footer-edit" style={{ height: '210px' }}>
+        <Footer className="footer-edit" style={{ height: '210px' }} id="footer">
           <Editor />
         </Footer>
       </Layout>

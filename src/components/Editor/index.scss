@@ -1,4 +1,5 @@
 .footer-edit {
+  position: relative;
   .bf-container {
     height: auto;
   }
@@ -13,11 +14,62 @@
     }
   }
 
-  .emoji {
+  /* .emoji {
     background: transparent;
     border: none;
     &::after {
       box-shadow: none !important;
+    }
+  } */
+  /* .bf-emoji-dropdown {
+    .bfi-emoji {
+      font-size: 20px;
+    }
+    .dropdown-content {
+      top: -240px;
+      .dropdown-arrow {
+        top: 213px;
+      }
+    }
+  } */
+  .emoji-dropdown {
+    button.emoji-mart-anchor {
+      padding: 10px 4px;
+    }
+    button.emoji-mart-emoji {
+      padding: 4px;
+    }
+    .dropdown-content {
+      border-radius: 5px;
+      top: -335px;
+      .dropdown-arrow {
+        left: 55%;
+        top: auto;
+        bottom: -3px;
+        left: 50%;
+        background: #fff;
+        z-index: 10;
+      }
+    }
+    .dropdown-content-inner {
+      background: transparent;
+    }
+    .emoji-mart {
+      display: block;
+    }
+    .emoji-mart-search {
+      display: none;
+    }
+  }
+  .emoji-mart-anchor[title="微信"] {
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+  .control-item {
+    &.media {
+      display: none;
     }
   }
 }
