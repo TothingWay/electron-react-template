@@ -1,13 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import BraftEditor, { ControlType } from 'braft-editor'
 import { ContentUtils } from 'braft-utils'
 import { getDefaultKeyBinding, KeyBindingUtil } from 'draft-js'
 import './index.scss'
+// 引入表情包扩展模块样式文件
+import 'braft-extensions/dist/emoticon.css'
+// 引入表情包扩展模块和默认表情包列表
+import Emoticon from 'braft-extensions/dist/emoticon'
 import 'emoji-mart/css/emoji-mart.css'
-import { Picker } from 'emoji-mart'
-import { SmileOutlined } from '@ant-design/icons'
+// import { Picker } from 'emoji-mart'
+// import { SmileOutlined } from '@ant-design/icons'
 import { CustomEmojis } from './customEmojis'
 const { hasCommandModifier } = KeyBindingUtil
+
+BraftEditor.use(
+  Emoticon({
+    emoticons: CustomEmojis.map((item) => item.imageUrl),
+    closeOnSelect: true,
+  }),
+)
 
 function Editor() {
   const [editorState, setEditorState] = useState<any>(
@@ -45,26 +56,19 @@ function Editor() {
     return getDefaultKeyBinding(e)
   }
 
-  useEffect(() => {
-    console.log(editor.current)
-  }, [])
-
   // emoji
-  const handleEmojiSelected = (emoji: any) => {
+  /* const handleEmojiSelected = (emoji: any) => {
     if (emoji.imageUrl) {
       console.log(emoji)
 
       setEditorState(ContentUtils.insertText(editorState, `[${emoji.name}]`))
-
-      // editor.current.hide()
     } else {
       setEditorState(ContentUtils.insertText(editorState, `${emoji.native}`))
-      // editor.current.hide()
     }
-  }
+  } */
 
   // 设置微信标题Tab图标
-  const customIcons: any = {
+  /* const customIcons: any = {
     categories: {
       custom: () => (
         <svg
@@ -81,10 +85,11 @@ function Editor() {
         </svg>
       ),
     },
-  }
+  } */
 
   const controls: ControlType[] = [
-    {
+    'emoji',
+    /* {
       key: 'emoji-dropdown',
       type: 'dropdown',
       // title: 'emoji', // 指定鼠标悬停提示文案
@@ -129,24 +134,9 @@ function Editor() {
           icons={customIcons}
         />
       ), // 指定在下拉组件中显示的内容组件
-    },
+    }, */
     'media',
   ]
-
-  const blockExportFn = (contentState: any, block: any) => {
-    const previousBlock = contentState.getBlockBefore(block.key)
-
-    if (
-      block.type === 'unstyled' &&
-      previousBlock &&
-      previousBlock.getType() === 'atomic'
-    ) {
-      return {
-        start: '',
-        end: '',
-      }
-    }
-  }
 
   return (
     <BraftEditor
@@ -163,7 +153,6 @@ function Editor() {
         editorState,
         onChange: handleEditorChange,
       }}
-      converts={{ blockExportFn }}
     />
   )
 }

@@ -2,6 +2,9 @@
   position: relative;
   .bf-container {
     height: auto;
+    .separator-line {
+      display: none;
+    }
   }
   .edit-control-bar {
     box-shadow: none;
@@ -32,7 +35,7 @@
       }
     }
   } */
-  .emoji-dropdown {
+  /* .emoji-dropdown {
     button.emoji-mart-anchor {
       padding: 10px 4px;
     }
@@ -66,10 +69,18 @@
       width: 22px;
       height: 22px;
     }
-  }
+  } */
   .control-item {
     &.media {
       display: none;
+    }
+  }
+  .extend-control-item {
+    .dropdown-content {
+      top: -230px;
+      .dropdown-arrow {
+        top: 203px;
+      }
     }
   }
 }

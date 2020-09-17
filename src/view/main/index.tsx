@@ -266,8 +266,6 @@ function Main() {
   }, [])
 
   const handleMenuClick = ({ key }: any) => {
-    console.log(key)
-
     if (key === 'logout') {
       history.push('/login')
     }
@@ -337,7 +335,7 @@ function Main() {
           bounceTop={false}
           bounceBottom={false}
           data={userList}
-          style={{ height: 'calc(100% - 54px)' }}
+          style={{ height: 'calc(100% - 55px)' }}
         >
           <Menu
             className="menu-large menu-users"

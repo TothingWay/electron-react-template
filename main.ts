@@ -4,9 +4,39 @@ const {
   REACT_DEVELOPER_TOOLS,
   REDUX_DEVTOOLS,
 } = require('electron-devtools-installer')
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, Tray, nativeImage, Menu } = require('electron')
 const path = require('path')
 const isDev = require('electron-is-dev')
+const menuTemplate = require('./src/menuTemplate')
+
+let tray = null
+let timer = null
+let count = 0
+
+const iconImg = isDev
+  ? path.join(__dirname, './assets/trayIcon.png')
+  : nativeImage.createFromPath(path.join(__dirname, './trayIcon.png'))
+const iconEmptyImg = isDev
+  ? nativeImage.createFromPath(
+      path.join(__dirname, './assets/trayEmptyIcon.png'),
+    )
+  : nativeImage.createFromPath(path.join(__dirname, './trayEmptyIcon.png'))
+
+const trayNotice = () => {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+    count = 0
+  }
+  timer = setInterval(function () {
+    count++
+    if (count % 2 === 0) {
+      tray.setImage(iconEmptyImg)
+    } else {
+      tray.setImage(iconImg)
+    }
+  }, 500)
+}
 
 function createWindow() {
   // Create the browser window.
@@ -18,6 +48,7 @@ function createWindow() {
       worldSafeExecuteJavaScript: true,
       contextIsolation: true,
     },
+    autoHideMenuBar: true,
     titleBarStyle: 'hiddenInset',
   })
 
@@ -28,6 +59,21 @@ function createWindow() {
   mainWindow.loadURL(urlLocation)
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+  // set the menu
+  const menu = Menu.buildFromTemplate(menuTemplate)
+  Menu.setApplicationMenu(menu)
+
+  tray = new Tray(iconImg)
+  trayNotice()
+  tray.on('click', () => {
+    // 清楚图标闪烁定时器
+    clearInterval(timer)
+    timer = null
+    count = 0
+    // 还原图标
+    tray.setImage(iconImg)
+    mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+  })
 }
 
 // This method will be called when Electron has finished
@@ -35,6 +81,7 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
   createWindow()
+
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.

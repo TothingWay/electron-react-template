@@ -5,9 +5,9 @@ module.exports = {
   entry: './main.ts',
   output: {
     path: path.resolve(__dirname, './build'),
-    filename: 'main.js'
+    filename: 'main.js',
   },
   node: {
-    __dirname: false
-  }
+    __dirname: false,
+  },
 }
