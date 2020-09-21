@@ -7,7 +7,7 @@ import './index.scss'
 import 'braft-extensions/dist/emoticon.css'
 // 引入表情包扩展模块和默认表情包列表
 import Emoticon from 'braft-extensions/dist/emoticon'
-import 'emoji-mart/css/emoji-mart.css'
+// import 'emoji-mart/css/emoji-mart.css'
 // import { Picker } from 'emoji-mart'
 // import { SmileOutlined } from '@ant-design/icons'
 import { CustomEmojis } from './customEmojis'
@@ -16,6 +16,7 @@ const { hasCommandModifier } = KeyBindingUtil
 BraftEditor.use(
   Emoticon({
     emoticons: CustomEmojis.map((item) => item.imageUrl),
+    closeOnBlur: true,
     closeOnSelect: true,
   }),
 )

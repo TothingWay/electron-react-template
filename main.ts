@@ -4,7 +4,7 @@ const {
   REACT_DEVELOPER_TOOLS,
   REDUX_DEVTOOLS,
 } = require('electron-devtools-installer')
-const { app, BrowserWindow, Tray, nativeImage, Menu } = require('electron')
+const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron')
 const path = require('path')
 const isDev = require('electron-is-dev')
 const menuTemplate = require('./src/menuTemplate')
@@ -14,14 +14,13 @@ let timer = null
 let count = 0
 
 const iconImg = isDev
-  ? path.join(__dirname, './assets/trayIcon.png')
+  ? nativeImage.createFromPath(path.join(__dirname, './assets/trayIcon.png'))
   : nativeImage.createFromPath(path.join(__dirname, './trayIcon.png'))
 const iconEmptyImg = isDev
   ? nativeImage.createFromPath(
       path.join(__dirname, './assets/trayEmptyIcon.png'),
     )
   : nativeImage.createFromPath(path.join(__dirname, './trayEmptyIcon.png'))
-
 const trayNotice = () => {
   if (timer) {
     clearInterval(timer)
