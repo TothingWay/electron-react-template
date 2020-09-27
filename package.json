@@ -13,6 +13,7 @@
     "@better-scroll/core": "^2.0.3",
     "@better-scroll/mouse-wheel": "^2.0.3",
     "@better-scroll/scroll-bar": "^2.0.3",
+    "@types/socket.io-client": "^1.4.33",
     "antd": "^4.6.3",
     "braft-editor": "^2.3.9",
     "braft-extensions": "^0.1.0",
@@ -21,7 +22,8 @@
     "react-router-config": "^5.1.1",
     "react-router-dom": "^5.2.0",
     "react-transition-group": "^4.4.1",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "socket.io-client": "^2.3.0"
   },
   "scripts": {
     "start": "craco start",
