@@ -1,9 +1,8 @@
-import React, { memo, useState, useEffect, useCallback } from 'react'
+import React, { memo } from 'react'
 import { Form, Input, Button } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import './index.scss'
-// import { useHistory } from 'react-router-dom'
-import webSocket from 'socket.io-client'
+import { useHistory } from 'react-router-dom'
 
 export interface LoginParamsType {
   userName: string
@@ -11,37 +10,11 @@ export interface LoginParamsType {
 }
 
 function Login(props: any) {
-  // const history = useHistory()
-  const [ws, setWs] = useState<any>(null)
+  const history = useHistory()
   const onFinish = (values: any) => {
-    // history.push('/main')
-    // console.log('Success:', values.username)
-    setWs(webSocket(values.username))
+    history.push('/main')
+    console.log('Success:', values.username)
   }
-
-  const connectWebSocket = () => {
-    setWs(webSocket('http://localhost:3001'))
-  }
-
-  const initWebSocket = useCallback(() => {
-    ws.on('getMessage', (message: any) => {
-      console.log(message)
-    })
-  }, [ws])
-
-  const sendMessage = useCallback(() => {
-    ws.emit('getMessage', '发送消息')
-  }, [ws])
-
-  useEffect(() => {
-    // connectWebSocket()
-    if (ws) {
-      //連線成功在 console 中打印訊息
-      console.log('success connect!')
-      //設定監聽
-      initWebSocket()
-    }
-  }, [initWebSocket, ws])
 
   return (
     <div className="container">
@@ -80,13 +53,6 @@ function Login(props: any) {
               className="login-form-button"
             >
               登录
-            </Button>
-            <Button
-              type="primary"
-              className="login-form-button"
-              onClick={sendMessage}
-            >
-              发送消息
             </Button>
           </Form.Item>
         </Form>
