@@ -14,11 +14,11 @@ let timer = null
 let count = 0
 
 const iconImg = isDev
-  ? nativeImage.createFromPath(path.join(__dirname, './assets/trayIcon.png'))
+  ? nativeImage.createFromPath(path.join(__dirname, './public/trayIcon.png'))
   : nativeImage.createFromPath(path.join(__dirname, './trayIcon.png'))
 const iconEmptyImg = isDev
   ? nativeImage.createFromPath(
-      path.join(__dirname, './assets/trayEmptyIcon.png'),
+      path.join(__dirname, './public/trayEmptyIcon.png'),
     )
   : nativeImage.createFromPath(path.join(__dirname, './trayEmptyIcon.png'))
 const trayNotice = () => {
