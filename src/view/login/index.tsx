@@ -1,20 +1,38 @@
-import React, { memo } from 'react'
+import React, { memo, useEffect } from 'react'
 import { Form, Input, Button } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import './index.scss'
 import { useHistory } from 'react-router-dom'
+import useSocket from '../../hooks/useSocket'
+import md5 from 'js-md5'
+import { message } from 'antd'
 
 export interface LoginParamsType {
-  userName: string
+  username: string
   password: string
 }
 
 function Login(props: any) {
+  const { socket, connectSocket, sendData, getData } = useSocket()
   const history = useHistory()
-  const onFinish = (values: any) => {
-    history.push('/main')
-    console.log('Success:', values.username)
+  const onFinish = (values: LoginParamsType) => {
+    if (socket.connected) {
+      const password = md5(values.password)
+      sendData('login', { username: values.username, password })
+    } else {
+      message.error('连接失败，请检查网络！')
+    }
+    console.log('Success:', values)
   }
+
+  useEffect(() => {
+    connectSocket()
+    getData('login', (data) => {
+      console.log(data)
+      history.push('/main')
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="container">
