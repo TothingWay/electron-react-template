@@ -1,11 +1,16 @@
-import React, { memo, useEffect } from 'react'
+import React, { memo, useEffect, useState, useCallback } from 'react'
 import { Form, Input, Button } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import './index.scss'
 import { useHistory } from 'react-router-dom'
 import useSocket from '../../hooks/useSocket'
+import { useDispatch } from 'react-redux'
 import md5 from 'js-md5'
 import { message } from 'antd'
+import * as actionTypes from '../../store/modules/accounts/actionCreators'
+const Store = window.require('electron-store')
+const store = new Store({ name: 'token' })
+const storeUsername = new Store({ name: 'username' })
 
 export interface LoginParamsType {
   username: string
@@ -13,26 +18,77 @@ export interface LoginParamsType {
 }
 
 function Login(props: any) {
-  const { socket, connectSocket, sendData, getData } = useSocket()
+  const { socket, connectSocket, send, listen } = useSocket()
+  const [loading, setLoading] = useState(false)
+  const [formValues, setFormValues] = useState<LoginParamsType>()
   const history = useHistory()
-  const onFinish = (values: LoginParamsType) => {
-    if (socket.connected) {
-      const password = md5(values.password)
-      sendData('login', { username: values.username, password })
-    } else {
-      message.error('连接失败，请检查网络！')
-    }
-    console.log('Success:', values)
-  }
+  const dispatch = useDispatch()
+
+  const dispatchAccounts = useCallback(
+    (accounts) => {
+      dispatch(actionTypes.changeAccounts(accounts))
+    },
+    [dispatch],
+  )
+
+  const onFinish = useCallback(
+    (values: LoginParamsType) => {
+      storeUsername.set('username', values.username)
+      setLoading(true)
+      connectSocket()
+      setFormValues(values)
+    },
+    [connectSocket],
+  )
 
   useEffect(() => {
-    connectSocket()
-    getData('login', (data) => {
-      console.log(data)
-      history.push('/main')
-    })
+    let tips: any
+    if (formValues) {
+      listen('connect', () => {
+        tips && tips()
+        tips && message.success('连接成功，正在为您重新登录')
+        const password = md5(formValues.password)
+        tips = null
+        send('login', { username: formValues.username, password })
+      })
+      listen('connect_error', () => {
+        tips = message.loading('无法连接服务器，正在尝试为您重新连接！')
+      })
+    }
+  }, [formValues, listen, send, socket])
+
+  useEffect(() => {
+    const token = store.get('token')
+    console.log('loginToken', token)
+
+    if (token) {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      send('login', { session_id: token })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (socket) {
+      listen('login', (data) => {
+        if (data.errcode === 0) {
+          store.set('token', data.session_id)
+          history.push('/main')
+          setLoading(false)
+        } else if (data.errcode === 10004) {
+          store.delete('token')
+          history.push('/login')
+        } else {
+          message.error(data.msg)
+        }
+      })
+
+      listen('accounts', (data) => {
+        dispatchAccounts(data)
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket])
 
   return (
     <div className="container">
@@ -69,6 +125,7 @@ function Login(props: any) {
               type="primary"
               htmlType="submit"
               className="login-form-button"
+              loading={loading}
             >
               登录
             </Button>

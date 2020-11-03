@@ -17,6 +17,8 @@
     "antd": "^4.6.3",
     "braft-editor": "^2.3.9",
     "braft-extensions": "^0.1.0",
+    "electron-store": "^6.0.1",
+    "fuse.js": "^6.4.2",
     "js-md5": "^0.7.3",
     "react-redux": "^7.2.1",
     "react-router": "^5.2.0",
@@ -32,7 +34,7 @@
     "test": "craco test",
     "buildMain": "webpack",
     "dev": "concurrently \"wait-on http://localhost:3000 && nodemon --watch main.ts --exec electron .\" \"cross-env BROWSER=none npm start\"",
-    "pack": "electron-builder --dir",
+    "pack": "electron-builder -w --dir",
     "dist": "electron-builder",
     "prepack": "npm run build && npm run buildMain",
     "predist": "npm run build && npm run buildMain"

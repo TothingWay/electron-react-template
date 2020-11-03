@@ -4,11 +4,17 @@ const {
   REACT_DEVELOPER_TOOLS,
   REDUX_DEVTOOLS,
 } = require('electron-devtools-installer')
-const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron')
+const {
+  app,
+  BrowserWindow,
+  Tray,
+  Menu,
+  nativeImage,
+  ipcMain,
+} = require('electron')
 const path = require('path')
 const isDev = require('electron-is-dev')
 const menuTemplate = require('./src/menuTemplate')
-
 let tray = null
 let timer = null
 let count = 0
@@ -44,8 +50,6 @@ function createWindow() {
     height: 900,
     webPreferences: {
       nodeIntegration: true,
-      worldSafeExecuteJavaScript: true,
-      contextIsolation: true,
     },
     autoHideMenuBar: true,
     titleBarStyle: 'hiddenInset',
@@ -63,7 +67,11 @@ function createWindow() {
   Menu.setApplicationMenu(menu)
 
   tray = new Tray(iconImg)
-  trayNotice()
+
+  ipcMain.on('trayNotice', () => {
+    trayNotice()
+  })
+
   tray.on('click', () => {
     // 清楚图标闪烁定时器
     clearInterval(timer)
@@ -71,7 +79,7 @@ function createWindow() {
     count = 0
     // 还原图标
     tray.setImage(iconImg)
-    mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+    mainWindow.show()
   })
 }
 
