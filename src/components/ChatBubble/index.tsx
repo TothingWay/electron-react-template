@@ -12,7 +12,7 @@ interface ChatBubbleProps {
 function ChatBubble(props: ChatBubbleProps) {
   const { src, position, content } = props
 
-  let message = content
+  let message = content || '[未知图片]'
   message = message.replace(/\[.+?\]/g, ($1) => {
     for (let i = 0; i < CustomEmojis.length; i++) {
       if (CustomEmojis[i].keywords === $1) {

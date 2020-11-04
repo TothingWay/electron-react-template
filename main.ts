@@ -27,6 +27,7 @@ const iconEmptyImg = isDev
       path.join(__dirname, './public/trayEmptyIcon.png'),
     )
   : nativeImage.createFromPath(path.join(__dirname, './trayEmptyIcon.png'))
+
 const trayNotice = () => {
   if (timer) {
     clearInterval(timer)
@@ -65,11 +66,20 @@ function createWindow() {
   // set the menu
   const menu = Menu.buildFromTemplate(menuTemplate)
   Menu.setApplicationMenu(menu)
-
   tray = new Tray(iconImg)
 
-  ipcMain.on('trayNotice', () => {
+  ipcMain.on('trayNotice', (e, avatar) => {
+    console.log(avatar)
+
     trayNotice()
+  })
+
+  ipcMain.on('clearTrayNotice', () => {
+    clearInterval(timer)
+    timer = null
+    count = 0
+    // 还原图标
+    tray.setImage(iconImg)
   })
 
   tray.on('click', () => {

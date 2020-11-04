@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react'
-import { Layout, Menu, Input, Dropdown, Empty, message } from 'antd'
+import { Layout, Menu, Input, Empty, message } from 'antd'
 import Scroll from '../../components/Scroll'
 import MenuAvatar from '../../components/MenuAvatar'
 import ChatBubble from '../../components/ChatBubble'
 import Editor from '../../components/Editor'
 import 'braft-editor/dist/index.css'
-import { MenuOutlined } from '@ant-design/icons'
+import { PoweroffOutlined } from '@ant-design/icons'
 import './index.scss'
 import { useHistory } from 'react-router-dom'
 import useSocket from '../../hooks/useSocket'
@@ -235,7 +235,7 @@ function Main() {
           src: currentFri.head_img || null,
         })
 
-        ipcRenderer.send('trayNotice')
+        // ipcRenderer.send('trayNotice')
 
         setHistoryRecord(wxidTo, currentFri.wxid, records)
       }
@@ -249,12 +249,10 @@ function Main() {
     setChatRecordList(chatRecords)
   }, [chatRecords])
 
-  const handleMenuClick = ({ key }: any) => {
-    if (key === 'logout') {
-      store.delete('token')
-      disconnectSocket()
-      history.push('/login')
-    }
+  const handleMenuClick = () => {
+    store.delete('token')
+    disconnectSocket()
+    history.push('/login')
   }
 
   const handleRemoveCurrentFriendCount = useCallback(
@@ -283,6 +281,19 @@ function Main() {
     }
     return show
   }, [])
+
+  useEffect(() => {
+    // ipcRenderer.send('trayNotice')
+    const dotList = accountList.filter((item) => {
+      return showDot(item.friends)
+    })
+
+    if (dotList.length) {
+      ipcRenderer.send('trayNotice', dotList[0].head_img)
+    } else {
+      ipcRenderer.send('clearTrayNotice')
+    }
+  }, [accountList, showDot, userList])
 
   const handleEnter = useCallback(
     (messageText) => {
@@ -352,12 +363,6 @@ function Main() {
     }
   }, [chatRecordList])
 
-  const menu = (
-    <Menu onClick={handleMenuClick}>
-      <Menu.Item key="logout">退出登录</Menu.Item>
-    </Menu>
-  )
-
   return (
     <Layout className="layout-main">
       <Sider
@@ -367,15 +372,7 @@ function Main() {
         onCollapse={onCollapse}
       >
         <div id="dark-background" className="dark-background">
-          <Dropdown
-            overlay={menu}
-            trigger={['click']}
-            getPopupContainer={() =>
-              document.getElementById('dark-background') as HTMLElement
-            }
-          >
-            <MenuOutlined />
-          </Dropdown>
+          <PoweroffOutlined onClick={handleMenuClick} />
         </div>
         {/* accounts */}
         <Scroll
