@@ -5,7 +5,6 @@ import './index.scss'
 import { useHistory } from 'react-router-dom'
 import useSocket from '../../hooks/useSocket'
 import { useDispatch } from 'react-redux'
-import md5 from 'js-md5'
 import { message } from 'antd'
 import * as actionTypes from '../../store/modules/accounts/actionCreators'
 const Store = window.require('electron-store')
@@ -47,7 +46,7 @@ function Login(props: any) {
       listen('connect', () => {
         tips && tips()
         tips && message.success('连接成功，正在为您重新登录')
-        const password = md5(formValues.password)
+        const password = formValues.password
         tips = null
         send('login', { username: formValues.username, password })
       })
@@ -74,13 +73,13 @@ function Login(props: any) {
         if (data.errcode === 0) {
           store.set('token', data.session_id)
           history.push('/main')
-          setLoading(false)
         } else if (data.errcode === 10004) {
           store.delete('token')
           history.push('/login')
         } else {
           message.error(data.msg)
         }
+        setLoading(false)
       })
 
       listen('accounts', (data) => {

@@ -75,6 +75,8 @@
 }
 
 .main-layout-header {
+  display: flex;
+  justify-content: space-between;
   height: 55px;
   line-height: 55px;
   border-bottom: 1px solid #e6e6e6;
@@ -82,6 +84,12 @@
   font-size: 16px;
   font-weight: 500;
   background: #fafafa;
+  .btn-header-dropdown {
+    font-size: 22px;
+    height: 55px;
+    line-height: 48px;
+    font-weight: 700;
+  }
 }
 
 .main-layout {
@@ -101,4 +109,8 @@
   .ant-empty-description {
     color: #fff;
   }
+}
+
+.ant-dropdown {
+  z-index: 99999;
 }

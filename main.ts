@@ -13,6 +13,7 @@ const {
   ipcMain,
 } = require('electron')
 const path = require('path')
+const url = require('url')
 const isDev = require('electron-is-dev')
 const menuTemplate = require('./src/menuTemplate')
 let tray = null
@@ -47,8 +48,8 @@ const trayNotice = () => {
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1440,
-    height: 900,
+    width: 1366,
+    height: 768,
     webPreferences: {
       nodeIntegration: true,
     },
@@ -90,6 +91,34 @@ function createWindow() {
     // 还原图标
     tray.setImage(iconImg)
     mainWindow.show()
+  })
+
+  ipcMain.on('openNewWindow', (e, key) => {
+    const urlLocation = isDev
+      ? `http://localhost:3000?wxid=${key.query.wxid}${key.hash}`
+      : url.format({
+          pathname: path.join(__dirname, `./index.html`),
+          protocol: 'file',
+          hash: key.hash,
+          query: key.query,
+        })
+
+    let orderWin = new BrowserWindow({
+      width: 1366,
+      height: 768,
+      webPreferences: {
+        nodeIntegration: true,
+        webSecurity: false,
+      },
+      autoHideMenuBar: true,
+      titleBarStyle: 'hiddenInset',
+    })
+
+    orderWin.on('close', function () {
+      orderWin = null
+    })
+    orderWin.loadURL(urlLocation)
+    orderWin.show()
   })
 }
 

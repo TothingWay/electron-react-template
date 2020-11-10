@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react'
-import { Layout, Menu, Input, Empty, message } from 'antd'
+import { Layout, Menu, Input, Empty, message, Dropdown, Button } from 'antd'
 import Scroll from '../../components/Scroll'
 import MenuAvatar from '../../components/MenuAvatar'
 import ChatBubble from '../../components/ChatBubble'
 import Editor from '../../components/Editor'
 import 'braft-editor/dist/index.css'
-import { PoweroffOutlined } from '@ant-design/icons'
+import {
+  PoweroffOutlined,
+  EllipsisOutlined,
+  ShoppingCartOutlined,
+  FundViewOutlined,
+} from '@ant-design/icons'
 import './index.scss'
 import { useHistory } from 'react-router-dom'
 import useSocket from '../../hooks/useSocket'
@@ -235,8 +240,6 @@ function Main() {
           src: currentFri.head_img || null,
         })
 
-        // ipcRenderer.send('trayNotice')
-
         setHistoryRecord(wxidTo, currentFri.wxid, records)
       }
     })
@@ -283,7 +286,6 @@ function Main() {
   }, [])
 
   useEffect(() => {
-    // ipcRenderer.send('trayNotice')
     const dotList = accountList.filter((item) => {
       return showDot(item.friends)
     })
@@ -362,6 +364,27 @@ function Main() {
       scrollRecordRef.current.getBScroll().scrollTo(0, maxScrollY)
     }
   }, [chatRecordList])
+
+  const handleHeaderDropdownClick = ({ key }: any) => {
+    // ipcRenderer.send('openNewWindow', `?wxid=${currentFriend.wxid}#/${key}`)
+    ipcRenderer.send('openNewWindow', {
+      hash: `#/${key}`,
+      query: {
+        wxid: currentFriend.wxid,
+      },
+    })
+  }
+
+  const headerDropdownMenu = (
+    <Menu onClick={handleHeaderDropdownClick}>
+      <Menu.Item key="order">
+        <ShoppingCartOutlined /> 去下单
+      </Menu.Item>
+      <Menu.Item key="orderDetail">
+        <FundViewOutlined /> 查看订单
+      </Menu.Item>
+    </Menu>
+  )
 
   return (
     <Layout className="layout-main">
@@ -468,7 +491,20 @@ function Main() {
         className="main-layout"
         onClick={() => handleRemoveCurrentFriendCount(currentFriend)}
       >
-        <div className="main-layout-header">{currentFriend.nickname}</div>
+        <div className="main-layout-header">
+          <span>{currentFriend.nickname}</span>
+          {currentFriend.nickname ? (
+            <Dropdown
+              overlay={headerDropdownMenu}
+              trigger={['click']}
+              placement="bottomRight"
+            >
+              <Button type="text" className="btn-header-dropdown">
+                <EllipsisOutlined />
+              </Button>
+            </Dropdown>
+          ) : null}
+        </div>
         <Content>
           <Scroll
             bounceTop={false}

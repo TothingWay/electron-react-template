@@ -26,6 +26,7 @@ type ScrollProps = {
   onScroll?: Function
   bounceTop?: boolean //是否支持向上吸顶
   bounceBottom?: boolean //是否支持向下吸顶
+  stopPropagation?: boolean //是否阻止冒泡
   className?: string
   style?: React.CSSProperties
   data?: any // watch data to refresh Scroll
@@ -44,6 +45,7 @@ const Scroll = forwardRef<ScrollImperativeHandle, ScrollProps>((props, ref) => {
     className,
     data,
     style,
+    stopPropagation = true,
   } = props
 
   // Method props
@@ -62,7 +64,7 @@ const Scroll = forwardRef<ScrollImperativeHandle, ScrollProps>((props, ref) => {
         top: bounceTop,
         bottom: bounceBottom,
       },
-      stopPropagation: true,
+      stopPropagation,
       mouseWheel: true,
       scrollbar: {
         interactive: true,
