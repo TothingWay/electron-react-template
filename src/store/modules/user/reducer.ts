@@ -9,7 +9,7 @@ export default (state = defaultState, action: any) => {
   return produce(state, (draft) => {
     switch (action.type) {
       case actionTypes.CHANGE_USER_DATA:
-        draft.rankList = action.data
+        draft.userData = action.data
         break
     }
   })

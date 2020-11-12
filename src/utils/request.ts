@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { message } from 'antd'
-
+const Store = window.require('electron-store')
+const store = new Store({ name: 'token' })
 // import { verifySecondPassword } from '@/api/user'
 
 // create an axios instance
@@ -16,8 +17,7 @@ service.interceptors.request.use(
     // do something before request is sent
     configs.headers['Content-Type'] = 'application/json;charset=UTF-8'
     configs.headers['version'] = 'v2'
-    configs.headers['X-Request-Token'] =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbl9pZCI6MTAwMDAsImV4cCI6MTYwNTA3NDQ1OCwiaWF0IjoxNjA0OTg4MDU4LCJuYmYiOjE2MDQ5ODgwNTgsIm5pY2tuYW1lIjoi566h55CG5ZGYIiwidXNlcm5hbWUiOiJhZG1pbiJ9.4UbB3YtSNHAaM8o2jz8t5H-gjbSenZklEuZYaO5giUI'
+    configs.headers['X-Request-Token'] = store.get('token')
     return configs
   },
   (error) => {

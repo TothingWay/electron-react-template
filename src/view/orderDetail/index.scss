@@ -1,0 +1,22 @@
+.orderDetail {
+  padding-left: 12px;
+  padding-right: 12px;
+  .ant-form-inline .ant-form-item {
+    margin-bottom: 10px;
+  }
+}
+
+.ant-tooltip {
+  z-index: 999999;
+}
+
+.ant-drawer {
+  z-index: 999999;
+  .ant-drawer-body {
+    padding: 0;
+  }
+}
+
+.ant-picker-dropdown, .ant-select-dropdown {
+  z-index: 9999999;
+}

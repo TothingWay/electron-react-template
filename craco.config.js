@@ -1,3 +1,4 @@
+const AntdDayjsWebpackPlugin = require('antd-dayjs-webpack-plugin')
 module.exports = {
   babel: {
     plugins: [
@@ -9,6 +10,13 @@ module.exports = {
           style: 'css',
         },
       ],
+    ],
+  },
+  webpack: {
+    plugins: [
+      new AntdDayjsWebpackPlugin({
+        preset: 'antdv3',
+      }),
     ],
   },
 }
