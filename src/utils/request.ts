@@ -25,7 +25,6 @@ service.interceptors.request.use(
   },
 )
 
-let errorMessage: string
 // response interceptor
 service.interceptors.response.use(
   /**
@@ -43,10 +42,7 @@ service.interceptors.response.use(
     // const { code } = res
 
     if (res.msg) {
-      if (errorMessage !== res.msg) {
-        errorMessage = res.msg
-        message.error(res.msg)
-      }
+      message.error(res.msg)
     }
 
     return res
@@ -91,10 +87,7 @@ service.interceptors.response.use(
         break
     }
     if (status) {
-      if (errorMessage !== error.message) {
-        errorMessage = error.message
-        message.error(error.message)
-      }
+      message.error(error.message)
     }
 
     console.log('请求返回失败:', error.toJSON()) // for debug

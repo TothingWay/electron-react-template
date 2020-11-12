@@ -95,7 +95,7 @@ function createWindow() {
 
   ipcMain.on('openNewWindow', (e, key) => {
     const urlLocation = isDev
-      ? `http://localhost:3000?wxid=${key.query.wxid}${key.hash}`
+      ? `http://localhost:3000?wxid=${key.query.wxid}&${key.query.saleWxid}${key.hash}`
       : url.format({
           pathname: path.join(__dirname, `./index.html`),
           protocol: 'file',

@@ -38,3 +38,29 @@ export const getSaleOrderNo = (order_no: string) => {
     method: 'get',
   })
 }
+
+// 获取销售人员列表
+export const getAdminSale = () => {
+  return request({
+    url: `/bms/admin/sale`,
+    method: 'get',
+  })
+}
+
+// 预览订单
+export const previewSaleOrder = (data: any) => {
+  return request({
+    url: `/bms/sale/order/preview`,
+    method: 'post',
+    data,
+  })
+}
+
+// 创建订单
+export const createSaleOrder = (data: any) => {
+  return request({
+    url: `/bms/sale/order`,
+    method: 'post',
+    data,
+  })
+}

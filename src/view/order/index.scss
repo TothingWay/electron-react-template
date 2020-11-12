@@ -84,9 +84,20 @@
 }
 
 .ant-modal-mask {
-  z-index: 999999;
+  z-index: 9999;
 }
 
 .ant-modal-wrap {
-  z-index: 9999999;
+  z-index: 99999;
+}
+
+.ant-select-dropdown, .ant-cascader-menus {
+  z-index: 999999;
+}
+
+.cities-item {
+  margin-bottom: 0;
+  .ant-form-item-explain {
+    display: none;
+  }
 }

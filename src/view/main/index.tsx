@@ -371,6 +371,7 @@ function Main() {
       hash: `#/${key}`,
       query: {
         wxid: currentFriend.wxid,
+        saleWxid: currentAccount.wxid,
       },
     })
   }

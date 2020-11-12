@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable no-useless-escape */
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { memo, useEffect, useState, useCallback } from 'react'
-import { getSaleProduct } from '../../api'
+import React, { memo, useEffect, useState, useCallback, useRef } from 'react'
+import {
+  getSaleProduct,
+  getAdminSale,
+  createSaleOrder,
+  previewSaleOrder,
+} from '../../api'
 import './index.scss'
 import Scroll from '../../components/Scroll'
 import clipboard from '../../utils/clipboard'
@@ -23,6 +28,7 @@ import {
   Radio,
   Upload,
   Cascader,
+  Descriptions,
 } from 'antd'
 import {
   EditOutlined,
@@ -32,15 +38,18 @@ import {
   PlusOutlined,
 } from '@ant-design/icons'
 import { getQueryObject } from '../../utils'
-import cityOptions from './cities'
+import cityOptions from './area'
 const { Search } = Input
-
-console.log(cityOptions)
+const Store = window.require('electron-store')
+const store = new Store({ name: 'token' })
 
 function Order() {
+  const formRef = useRef<any>(null)
   const [list, setList] = useState([])
+  const [adminlist, setAdminList] = useState<Array<any>>([])
   const [listLoading, setListLoading] = useState(false)
-  const [visible, setVisible] = useState(true)
+  const [handleOrderLoading, setHandleOrderLoading] = useState(false)
+  const [visible, setVisible] = useState(false)
   const [productName, setProductName] = useState('')
   const [current, setCurrent] = useState(1)
   const [pageSize, setPageSize] = useState(50)
@@ -48,13 +57,14 @@ function Order() {
   const [shoppingList, setShoppingList] = useState<Array<any>>([])
   const [formData, setFormData] = useState<any>({
     user_wechat_id: getQueryObject(window.location.search).wxid,
+    sku_type: 1,
+    receipt_type: 1,
   })
 
   const getList = useCallback(() => {
     setListLoading(true)
     getSaleProduct(productName, current, pageSize)
       .then((res: any) => {
-        console.log(res)
         if (res.code === 200) {
           if (res.data.records) {
             setList(res.data.records)
@@ -73,6 +83,13 @@ function Order() {
 
   const onSearch = async (value: string) => {
     setProductName(value)
+  }
+
+  const handleClearShoppingList = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+  ) => {
+    e.preventDefault()
+    setShoppingList([])
   }
 
   const handleSetShoppingList = useCallback(
@@ -156,35 +173,96 @@ function Order() {
       message.info('请选添加商品至购物车后再下单')
       return
     }
-    Modal.confirm({
-      title: '你确定对购物车中的商品下单吗？',
-      icon: <ExclamationCircleOutlined />,
-      onOk() {
-        console.log('OK')
-      },
+    setHandleOrderLoading(true)
+    const previewShoppingList = shoppingList.map((item) => {
+      return {
+        sku_id: item.sku_id,
+        buy_count: item.number,
+        price: item.price_y,
+      }
     })
-  }, [shoppingList.length])
+
+    previewSaleOrder(previewShoppingList).then((res: any) => {
+      if (res.code === 200) {
+        Modal.confirm({
+          title: '你确定对购物车中的商品下单吗？',
+          icon: <ExclamationCircleOutlined />,
+          content: (
+            <Descriptions size="small" column={1} bordered>
+              <Descriptions.Item label="总价">
+                {res.data.total_price}
+              </Descriptions.Item>
+              <Descriptions.Item label="让利价格">
+                {res.data.let_price}
+              </Descriptions.Item>
+              <Descriptions.Item label="总数量">
+                {res.data.total_count}
+              </Descriptions.Item>
+            </Descriptions>
+          ),
+          onOk() {
+            setVisible(true)
+
+            setTimeout(() => {
+              formRef.current.setFieldsValue({
+                pay_price: res.data.total_price,
+              })
+              setFormData((val: any) => {
+                return {
+                  ...val,
+                  token_id: res.data.token_id,
+                  order_source: 1,
+                  sale_wechat_id: getQueryObject(window.location.search)
+                    .saleWxid,
+                }
+              })
+              for (let i = 0; i < adminlist.length; i++) {
+                if (adminlist[i].is_sale) {
+                  formRef.current.setFieldsValue({
+                    sale_id: adminlist[i].admin_id,
+                  })
+                }
+              }
+            }, 100)
+          },
+        })
+      }
+      setHandleOrderLoading(false)
+    })
+  }, [adminlist, shoppingList])
 
   const handleOk = useCallback(() => {
-    setVisible(false)
-  }, [])
+    formRef.current.validateFields().then(() => {
+      const data = { ...formData }
+      data.receiver_province = data.cities[0] || null
+      data.receiver_city = data.cities[1] || null
+      data.receiver_district = data.cities[2] || null
+      createSaleOrder(data).then((res: any) => {
+        if (res.code === 200) {
+          message.success('下单成功！')
+          setShoppingList([])
+          formRef.current.resetFields()
+          setVisible(false)
+        }
+      })
+    })
+  }, [formData])
 
   const handleCancel = useCallback(() => {
     setVisible(false)
   }, [])
 
   useEffect(() => {
-    console.log(getQueryObject(window.location.search))
-
     getList()
   }, [current, getList, pageSize, productName])
 
   const onFormChange = (formItem: any, form: any) => {
-    setFormData({ ...form })
-  }
-
-  const onFinish = (form: any) => {
-    setFormData({ ...form })
+    setFormData((val: any) => {
+      return {
+        ...val,
+        ...form,
+      }
+    })
   }
 
   function beforeUpload(file: File) {
@@ -203,16 +281,73 @@ function Order() {
     return <div>{loading ? <LoadingOutlined /> : <PlusOutlined />}</div>
   }
 
-  const [enterImageUrl, setEnterImageUrl] = useState<string | null>(null)
   const [enterImageLoading, setEnterImageLoading] = useState(false)
-  const handleEnterUploadChange = () => {
-    console.log(1)
+
+  const handleEnterUploadChange = (info: any) => {
+    if (info.file.status === 'uploading') {
+      setEnterImageLoading(true)
+      return
+    }
+    if (info.file.status === 'done') {
+      if (info.file.response.code === 200) {
+        setFormData((val: any) => {
+          return {
+            ...val,
+            enter_pic: info.file.response.data,
+          }
+        })
+      } else {
+        message.error(info.file.response.msg)
+      }
+
+      setEnterImageLoading(false)
+    }
+    if (info.file.status === 'error') {
+      message.error('上传失败！')
+      setEnterImageLoading(false)
+    }
   }
 
-  const [outImageUrl, setoutImageUrl] = useState<string | null>(null)
   const [outImageLoading, setoutImageLoading] = useState(false)
-  const handleOutUploadChange = () => {
-    console.log(1)
+  const handleOutUploadChange = (info: any) => {
+    if (info.file.status === 'uploading') {
+      setoutImageLoading(true)
+      return
+    }
+    if (info.file.status === 'done') {
+      if (info.file.response.code === 200) {
+        setFormData((val: any) => {
+          return {
+            ...val,
+            out_pic: info.file.response.data,
+          }
+        })
+      } else {
+        message.error(info.file.response.msg)
+      }
+
+      setoutImageLoading(false)
+    }
+
+    if (info.file.status === 'error') {
+      message.error('上传失败！')
+      setEnterImageLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    getAdminSale().then((res: any) => {
+      if (res.code === 200) {
+        setAdminList(res.data)
+      }
+    })
+  }, [])
+
+  const normFile = (e: any) => {
+    if (Array.isArray(e)) {
+      return e
+    }
+    return e && e.fileList
   }
 
   return (
@@ -307,10 +442,18 @@ function Order() {
             className="shopping-card"
             size="small"
             title="购物车"
-            extra={<a href="#">清空</a>}
+            extra={
+              <a href="#" onClick={(e) => handleClearShoppingList(e)}>
+                清空
+              </a>
+            }
             actions={[
               <Button onClick={(e) => handleClipboard(e)}>复制商品信息</Button>,
-              <Button type="primary" onClick={handleOrder}>
+              <Button
+                loading={handleOrderLoading}
+                type="primary"
+                onClick={handleOrder}
+              >
                 下单
               </Button>,
             ]}
@@ -417,69 +560,73 @@ function Order() {
         onCancel={handleCancel}
         width="80%"
       >
-        <Cascader
-          options={cityOptions}
-          placeholder="选择省市区"
-          style={{ marginBottom: '10px' }}
-        />
         <Form
           layout="horizontal"
           initialValues={formData}
+          ref={formRef}
           onValuesChange={onFormChange}
-          onFinish={onFinish}
-          labelCol={{ flex: '85px' }}
-          wrapperCol={{ flex: '1 1 85px' }}
+          labelCol={{ flex: '90px' }}
+          wrapperCol={{ flex: '1 1 90px' }}
         >
           <Row>
             <Col xs={24} sm={12}>
-              <Form.Item name="order_no" label="销售">
+              <Form.Item name="sale_id" label="销售">
                 <Select allowClear placeholder="销售">
-                  <Select.Option value={1}>待发货</Select.Option>
-                  <Select.Option value={2}>已发货</Select.Option>
-                  <Select.Option value={3}>已完成</Select.Option>
-                  <Select.Option value={4}>已关闭</Select.Option>
-                  <Select.Option value={5}>退货中</Select.Option>
-                  <Select.Option value={6}>已退货</Select.Option>
-                  <Select.Option value={7}>无效订单</Select.Option>
-                  <Select.Option value={8}>部分发货</Select.Option>
+                  {adminlist.map((item: any) => {
+                    return (
+                      <Select.Option key={item.admin_id} value={item.admin_id}>
+                        {item.nickname}
+                      </Select.Option>
+                    )
+                  })}
                 </Select>
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="receiver_name" label="客户微信">
+              <Form.Item name="user_wechat_id" label="客户微信">
                 <Input disabled placeholder="客户微信" />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="receiver_name" label="订单总价">
-                <Input placeholder="订单总价" />
+              <Form.Item name="pay_price" label="订单总价">
+                <Input allowClear placeholder="订单总价" />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="receiver_phone" label="商品类型">
+              <Form.Item name="sku_type" label="商品类型">
                 <Radio.Group>
                   <Radio value={1}>普通商品</Radio>
                 </Radio.Group>
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="express_no" label="收款类型">
+              <Form.Item name="receipt_type" label="收款类型">
                 <Radio.Group>
                   <Radio value={1}>全款</Radio>
-                  <Radio value={2}>预售单</Radio>
                 </Radio.Group>
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="express_no" label="支付方式">
+              <Form.Item
+                name="payment_type"
+                label="支付方式"
+                rules={[{ required: true, message: '该项为必填项!' }]}
+              >
                 <Radio.Group>
-                  <Radio value={1}>微信</Radio>
-                  <Radio value={2}>支付宝</Radio>
+                  <Radio value={1}>支付宝</Radio>
+                  <Radio value={2}>微信</Radio>
+                  <Radio value={3}>余额支付</Radio>
+                  <Radio value={4}>礼品卡</Radio>
+                  <Radio value={5}>银行转账</Radio>
                 </Radio.Group>
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="express_no" label="已转给财务">
+              <Form.Item
+                name="pay_status"
+                label="已转给财务"
+                rules={[{ required: true, message: '该项为必填项!' }]}
+              >
                 <Radio.Group>
                   <Radio value={1}>是</Radio>
                   <Radio value={2}>否</Radio>
@@ -487,29 +634,42 @@ function Order() {
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="express_no" label="提前打单">
+              <Form.Item
+                name="advance_threaten"
+                label="提前打单"
+                rules={[{ required: true, message: '该项为必填项!' }]}
+              >
                 <Radio.Group>
-                  <Radio value={1}>不需提前打单</Radio>
-                  <Radio value={2}>提前打单</Radio>
+                  <Radio value={2}>不需提前打单</Radio>
+                  <Radio value={1}>提前打单</Radio>
                 </Radio.Group>
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="enter" valuePropName="fileList" label="入账截图">
+              <Form.Item
+                name="enterFileList"
+                valuePropName="fileList"
+                getValueFromEvent={normFile}
+                label="入账截图"
+                rules={[{ required: true, message: '该项为必填项!' }]}
+              >
                 <Upload
-                  name="avatar"
                   listType="picture-card"
                   className="avatar-uploader"
                   showUploadList={false}
                   action={
                     process.env.REACT_APP_API2 + '/bms/sale/order/upload/img'
                   }
+                  headers={{
+                    version: 'v2',
+                    'X-Request-Token': store.get('token'),
+                  }}
                   beforeUpload={beforeUpload}
                   onChange={handleEnterUploadChange}
                 >
-                  {enterImageUrl ? (
+                  {formData.enter_pic ? (
                     <img
-                      src={enterImageUrl}
+                      src={formData.enter_pic}
                       alt="avatar"
                       style={{ width: '100%' }}
                     />
@@ -520,21 +680,30 @@ function Order() {
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="out" valuePropName="fileList" label="出账截图">
+              <Form.Item
+                name="outFileList"
+                valuePropName="fileList"
+                getValueFromEvent={normFile}
+                label="出账截图"
+                rules={[{ required: true, message: '该项为必填项!' }]}
+              >
                 <Upload
-                  name="avatar"
                   listType="picture-card"
                   className="avatar-uploader"
                   showUploadList={false}
                   action={
                     process.env.REACT_APP_API2 + '/bms/sale/order/upload/img'
                   }
+                  headers={{
+                    version: 'v2',
+                    'X-Request-Token': store.get('token'),
+                  }}
                   beforeUpload={beforeUpload}
                   onChange={handleOutUploadChange}
                 >
-                  {outImageUrl ? (
+                  {formData.out_pic ? (
                     <img
-                      src={outImageUrl}
+                      src={formData.out_pic}
                       alt="avatar"
                       style={{ width: '100%' }}
                     />
@@ -546,31 +715,54 @@ function Order() {
             </Col>
 
             <Col xs={24} sm={12}>
-              <Form.Item name="express_no" label="姓名">
-                <Input placeholder="姓名" />
+              <Form.Item
+                name="receiver_name"
+                label="姓名"
+                rules={[{ required: true, message: '该项为必填项!' }]}
+              >
+                <Input allowClear placeholder="姓名" />
               </Form.Item>
             </Col>
             <Col xs={24} sm={12}>
-              <Form.Item name="express_no" label="联系电话">
-                <Input placeholder="联系电话" />
+              <Form.Item
+                name="receiver_phone"
+                label="联系电话"
+                rules={[{ required: true, message: '该项为必填项!' }]}
+              >
+                <Input allowClear placeholder="联系电话" />
               </Form.Item>
             </Col>
             <Col xs={24}>
-              <Form.Item name="address" label="收货地址">
-                <Form.Item name="cities" noStyle>
+              <Form.Item label="收货地址">
+                <Form.Item
+                  name="cities"
+                  className="cities-item"
+                  rules={[{ required: true, message: '该项为必填项' }]}
+                >
                   <Cascader
                     options={cityOptions}
+                    fieldNames={{
+                      label: 'value',
+                      value: 'value',
+                      children: 'items',
+                    }}
                     placeholder="选择省市区"
+                    showSearch
+                    allowClear
                     style={{ marginBottom: '10px' }}
                   />
                 </Form.Item>
-                <Form.Item name="receiver_address" noStyle>
+                <Form.Item
+                  name="receiver_address"
+                  noStyle
+                  rules={[{ required: true, message: '该项为必填项!' }]}
+                >
                   <Input.TextArea placeholder="详细地址" />
                 </Form.Item>
               </Form.Item>
             </Col>
             <Col xs={24}>
-              <Form.Item name="express_no" label="客户备注">
+              <Form.Item name="user_remark" label="客户备注">
                 <Input.TextArea placeholder="客户备注" />
               </Form.Item>
             </Col>
