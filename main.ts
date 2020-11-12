@@ -45,6 +45,8 @@ const trayNotice = () => {
   }, 500)
 }
 
+const windowsList = []
+
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -93,6 +95,12 @@ function createWindow() {
     mainWindow.show()
   })
 
+  mainWindow.on('close', function () {
+    windowsList.forEach((item) => {
+      item.hide()
+    })
+  })
+
   ipcMain.on('openNewWindow', (e, key) => {
     const urlLocation = isDev
       ? `http://localhost:3000?wxid=${key.query.wxid}&${key.query.saleWxid}${key.hash}`
@@ -119,6 +127,13 @@ function createWindow() {
     })
     orderWin.loadURL(urlLocation)
     orderWin.show()
+
+    windowsList.push(orderWin)
+  })
+  ipcMain.on('closeOtherWindow', () => {
+    windowsList.forEach((item) => {
+      item.hide()
+    })
   })
 }
 

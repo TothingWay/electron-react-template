@@ -255,6 +255,7 @@ function Main() {
   const handleMenuClick = () => {
     store.delete('token')
     disconnectSocket()
+    ipcRenderer.send('closeOtherWindow')
     history.push('/login')
   }
 
