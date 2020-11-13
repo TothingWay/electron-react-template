@@ -37,7 +37,7 @@ import {
   LoadingOutlined,
   PlusOutlined,
 } from '@ant-design/icons'
-import { getQueryObject } from '../../utils'
+import { getQueryObject, isvalidPhone } from '../../utils'
 import cityOptions from './area'
 const { Search } = Input
 const Store = window.require('electron-store')
@@ -67,6 +67,8 @@ function Order() {
       .then((res: any) => {
         if (res.code === 200) {
           if (res.data.records) {
+            console.log(res.data.records)
+
             setList(res.data.records)
           } else {
             setList([])
@@ -350,6 +352,15 @@ function Order() {
     return e && e.fileList
   }
 
+  // 手机验证
+  const validatePhone = (rule: any, value: string, callback: any) => {
+    if (value && !isvalidPhone(value)) {
+      callback(new Error('请输入正确手机号'))
+    } else {
+      callback()
+    }
+  }
+
   return (
     <div className="order-wrapper">
       <Row gutter={20}>
@@ -554,7 +565,7 @@ function Order() {
       </Row>
 
       <Modal
-        title="表单填写"
+        title="订单信息"
         visible={visible}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -727,7 +738,10 @@ function Order() {
               <Form.Item
                 name="receiver_phone"
                 label="联系电话"
-                rules={[{ required: true, message: '该项为必填项!' }]}
+                rules={[
+                  { required: true, message: '该项为必填项!' },
+                  { validator: validatePhone },
+                ]}
               >
                 <Input allowClear placeholder="联系电话" />
               </Form.Item>

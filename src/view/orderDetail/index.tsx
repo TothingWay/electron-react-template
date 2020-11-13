@@ -24,7 +24,6 @@ import Scroll from '../../components/Scroll'
 function OrderDetail() {
   const [formData, setFormData] = useState<any>({
     user_wechat_id: getQueryObject(window.location.search).wxid,
-    status: 2,
   })
   const [tableData, setTableData] = useState([])
   const [current, setCurrent] = useState(1)
@@ -365,6 +364,7 @@ function OrderDetail() {
                   <Card
                     size="small"
                     key={item.sku_id}
+                    style={{ marginBottom: '10px' }}
                     cover={
                       <img
                         height="80px"
@@ -386,6 +386,9 @@ function OrderDetail() {
                     <div className="ant-card-meta-description">
                       商品总价：
                       <span style={{ color: '#1890ff' }}>{item.total_y}</span>
+                    </div>
+                    <div className="ant-card-meta-description">
+                      商品数量：{item.num}
                     </div>
                     <div className="ant-card-meta-description">
                       商品规格：{item.properties_value}
