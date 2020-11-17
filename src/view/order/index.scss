@@ -58,6 +58,12 @@
       justify-content: space-between;
       .item-title {
         font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        .anticon-delete {
+          cursor: pointer;
+          color: #ff4d4f;
+        }
       }
       .item-content {
         display: flex;

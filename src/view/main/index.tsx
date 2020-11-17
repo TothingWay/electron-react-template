@@ -42,7 +42,7 @@ function Main() {
 
   // 账号数据
   const [accountList, setAccountList] = useState<Array<any>>(accounts)
-  const [currentAccount, setCurrentAccount] = useState<any>()
+  const [currentAccount, setCurrentAccount] = useState<any>({})
 
   useEffect(() => {
     setAccountList([...accounts])
@@ -51,7 +51,7 @@ function Main() {
   // 用户数据
   const [userList, setUserList] = useState<Array<any>>([])
   const [allUserList, setAllUserList] = useState<Array<any>>([])
-  const [currentFriend, setCurrentFriend] = useState<any>([])
+  const [currentFriend, setCurrentFriend] = useState<any>({})
 
   // 聊天记录
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -76,14 +76,15 @@ function Main() {
     friendWxid: string,
     records: Array<any>,
   ) => {
-    storeUserRecord.set(storeUsername.get('username'), {
-      [accountWxid]: {
-        [friendWxid]: records,
-      },
-    })
+    // storeUserRecord.get(storeUsername.get('username'))
+    const historyRecords = storeUserRecord.get(storeUsername.get('username'))
+      ? {
+          ...storeUserRecord.get(storeUsername.get('username')),
+        }
+      : {}
+    historyRecords[accountWxid][friendWxid] = records
+    storeUserRecord.set(storeUsername.get('username'), historyRecords)
   }
-
-  const [chatRecords, setChatRecords] = useState<Array<any>>([])
 
   const dispatch = useDispatch()
 
@@ -128,6 +129,16 @@ function Main() {
     [allUserList, fuse],
   )
 
+  const scrollRecordsToBottom = useCallback(() => {
+    if (scrollRecordRef.current.getBScroll()) {
+      setTimeout(() => {
+        scrollRecordRef.current.getBScroll().refresh()
+        const maxScrollY = scrollRecordRef.current.getBScroll().maxScrollY
+        scrollRecordRef.current.getBScroll().scrollTo(0, maxScrollY)
+      }, 0)
+    }
+  }, [])
+
   useEffect(() => {
     initFuse(userList)
   }, [initFuse, userList])
@@ -152,7 +163,6 @@ function Main() {
     listen('message', (data) => {
       const message = data.message.message
       const wxidTo = message.wxid_to
-
       const userAccounts = [...accountList]
 
       const ToAccountIndex = userAccounts.findIndex((item: any) => {
@@ -224,7 +234,7 @@ function Main() {
       }
 
       // set chatRecords
-      if (currentFri) {
+      /* if (wxidFrom === currentFriend.wxid) {
         setChatRecords((val) => [
           ...val,
           {
@@ -233,7 +243,8 @@ function Main() {
             src: currentFri.head_img || null,
           },
         ])
-
+      } */
+      if (currentFri) {
         const records = getHistoryRecord(wxidTo, currentFri.wxid).concat({
           position: 'left',
           content: msg,
@@ -241,16 +252,11 @@ function Main() {
         })
 
         setHistoryRecord(wxidTo, currentFri.wxid, records)
+        scrollRecordsToBottom()
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket])
-
-  // 聊天记录
-  const [chatRecordList, setChatRecordList] = useState<Array<any>>([])
-  useEffect(() => {
-    setChatRecordList(chatRecords)
-  }, [chatRecords])
 
   const handleMenuClick = () => {
     store.delete('token')
@@ -308,14 +314,14 @@ function Main() {
           msg: messageText,
         })
 
-        setChatRecords((chatRecords) => [
+        /* setChatRecords((chatRecords) => [
           ...chatRecords,
           {
             position: 'right',
             src: currentAccount.head_img,
             content: messageText,
           },
-        ])
+        ]) */
         const records = getHistoryRecord(
           currentAccount.wxid,
           currentFriend.wxid,
@@ -336,6 +342,7 @@ function Main() {
         }
         setUserList(userLists)
         scrollFriendRef.current.getBScroll().scrollTo(0, 0, 200)
+        scrollRecordsToBottom()
       } else {
         message.info('请先选择一个好友发送')
       }
@@ -344,27 +351,20 @@ function Main() {
       currentAccount,
       currentFriend,
       handleRemoveCurrentFriendCount,
+      scrollRecordsToBottom,
       send,
       userList,
     ],
   )
 
-  const handleGetHistoryRecord = useCallback(
+  /* const handleGetHistoryRecord = useCallback(
     (item: any) => {
       if (currentAccount) {
         setChatRecords(getHistoryRecord(currentAccount.wxid, item.wxid))
       }
     },
     [currentAccount],
-  )
-
-  useEffect(() => {
-    if (scrollRecordRef.current.getBScroll()) {
-      scrollRecordRef.current.getBScroll().refresh()
-      const maxScrollY = scrollRecordRef.current.getBScroll().maxScrollY
-      scrollRecordRef.current.getBScroll().scrollTo(0, maxScrollY)
-    }
-  }, [chatRecordList])
+  ) */
 
   const handleHeaderDropdownClick = ({ key }: any) => {
     // ipcRenderer.send('openNewWindow', `?wxid=${currentFriend.wxid}#/${key}`)
@@ -471,7 +471,7 @@ function Main() {
                       onClick={() => {
                         setCurrentFriend(item)
                         handleRemoveCurrentFriendCount(item)
-                        handleGetHistoryRecord(item)
+                        scrollRecordsToBottom()
                       }}
                     >
                       <span className="menu-name">{item.nickname}</span>
@@ -511,22 +511,24 @@ function Main() {
           <Scroll
             bounceTop={false}
             bounceBottom={false}
-            data={chatRecordList}
+            data={getHistoryRecord(currentAccount.wxid, currentFriend.wxid)}
             ref={scrollRecordRef}
             style={{ height: '100%' }}
           >
             <div className="scroll-content">
               {currentFriend.nickname ? (
-                chatRecordList.map((item, index) => {
-                  return (
-                    <ChatBubble
-                      key={index}
-                      position={item.position}
-                      content={item.content}
-                      src={item.src}
-                    />
-                  )
-                })
+                getHistoryRecord(currentAccount.wxid, currentFriend.wxid).map(
+                  (item: any, index: number) => {
+                    return (
+                      <ChatBubble
+                        key={index}
+                        position={item.position}
+                        content={item.content}
+                        src={item.src}
+                      />
+                    )
+                  },
+                )
               ) : (
                 <Empty
                   description="暂无数据"

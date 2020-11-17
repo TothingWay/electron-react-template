@@ -49,7 +49,7 @@ function OrderDetail() {
       ),
     },
     {
-      title: '金额',
+      title: '订单金额',
       dataIndex: 'total_price',
       ellipsis: {
         showTitle: false,
@@ -61,7 +61,7 @@ function OrderDetail() {
       ),
     },
     {
-      title: '实际金额',
+      title: '支付金额',
       dataIndex: 'pay_price',
       ellipsis: {
         showTitle: false,

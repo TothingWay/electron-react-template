@@ -36,6 +36,7 @@ import {
   ExclamationCircleOutlined,
   LoadingOutlined,
   PlusOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons'
 import { getQueryObject, isvalidPhone } from '../../utils'
 import cityOptions from './area'
@@ -92,6 +93,12 @@ function Order() {
   ) => {
     e.preventDefault()
     setShoppingList([])
+  }
+
+  const handleDeleteItem = (index: number) => {
+    const shoppingLists = [...shoppingList]
+    shoppingLists.splice(index, 1)
+    setShoppingList(shoppingLists)
   }
 
   const handleSetShoppingList = useCallback(
@@ -191,8 +198,11 @@ function Order() {
           icon: <ExclamationCircleOutlined />,
           content: (
             <Descriptions size="small" column={1} bordered>
-              <Descriptions.Item label="总价">
+              <Descriptions.Item label="原价">
                 {res.data.total_price}
+              </Descriptions.Item>
+              <Descriptions.Item label="实际价格">
+                {res.data.product_price}
               </Descriptions.Item>
               <Descriptions.Item label="让利价格">
                 {res.data.let_price}
@@ -207,7 +217,7 @@ function Order() {
 
             setTimeout(() => {
               formRef.current.setFieldsValue({
-                pay_price: res.data.total_price,
+                pay_price: res.data.product_price,
               })
               setFormData((val: any) => {
                 return {
@@ -487,22 +497,18 @@ function Order() {
                           alt={item.product_name}
                         />
                         <div className="shopping-info">
-                          <div className="item-title">{item.product_name}</div>
+                          <div className="item-title">
+                            {item.product_name}
+                            <DeleteOutlined
+                              onClick={() => handleDeleteItem(index)}
+                            />
+                          </div>
                           <div className="item-content">
                             <div className="item-price">
                               {item.edit ? (
                                 <InputNumber
                                   style={{ width: '100px' }}
                                   defaultValue={item.price_y}
-                                  formatter={(value) =>
-                                    `￥ ${value}`.replace(
-                                      /\B(?=(\d{3})+(?!\d))/g,
-                                      ',',
-                                    )
-                                  }
-                                  parser={(value: any) =>
-                                    value.replace(/\￥\s?|(,*)/g, '')
-                                  }
                                   onChange={(value) =>
                                     handleShoppingListChange(value, index)
                                   }
