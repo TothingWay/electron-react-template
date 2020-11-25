@@ -29,6 +29,7 @@ import {
   Upload,
   Cascader,
   Descriptions,
+  Image,
 } from 'antd'
 import {
   EditOutlined,
@@ -397,11 +398,11 @@ function Order() {
                           <Card
                             bordered={false}
                             cover={
-                              <img
-                                height="80px"
-                                alt={item.product_name}
-                                src={item.pic}
-                                style={{ objectFit: 'contain' }}
+                              <Image
+                                height={80}
+                                src={item.pic ? item.pic : 'error'}
+                                className="card-img"
+                                fallback="https://imgservices-1252317822.image.myqcloud.com/image/20201015/45prvdakqe.svg"
                               />
                             }
                             onClick={() => handleSetShoppingList(item)}
@@ -491,10 +492,10 @@ function Order() {
                   shoppingList.map((item: any, index: number) => {
                     return (
                       <div key={item.sku_id} className="shopping-item">
-                        <img
-                          width="60px"
-                          src={item.pic}
-                          alt={item.product_name}
+                        <Image
+                          width={60}
+                          src={item.pic ? item.pic : 'error'}
+                          fallback="https://imgservices-1252317822.image.myqcloud.com/image/20201015/45prvdakqe.svg"
                         />
                         <div className="shopping-info">
                           <div className="item-title">

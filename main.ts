@@ -95,12 +95,6 @@ function createWindow() {
     mainWindow.show()
   })
 
-  mainWindow.on('close', function () {
-    windowsList.forEach((item) => {
-      item.hide()
-    })
-  })
-
   ipcMain.on('openNewWindow', (e, key) => {
     const urlLocation = isDev
       ? `http://localhost:3000?wxid=${key.query.wxid}&${key.query.saleWxid}${key.hash}`

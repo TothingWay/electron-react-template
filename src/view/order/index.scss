@@ -107,3 +107,9 @@
     display: none;
   }
 }
+
+.card-img {
+  .ant-image-img {
+    object-fit: contain;
+  }
+}
